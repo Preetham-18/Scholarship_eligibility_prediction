@@ -86,40 +86,78 @@ def sequential_covering(df):
               print("No more rules are required.")
         else:
              print("\nMore rules are required.")
+             learn_next_rule(remaining_students, rules)
 
-        print("\n Learned rules:")
-        for rule in rules:
-                print(rule)
+        print("\nLearned rules:")
 
-        return min_cgpa, selected_rule
+        for i, rule in enumerate(rules, start=1):
+              print(i, ".", rule)
+
+        return min_cgpa, selected_rule, rules
                   
 
 # print("\nSequential Covering Algorithm:")
 # min_cgpa, selected_rule = sequential_covering(df)
 
+def learn_next_rule(remaining_students, rules):
+    print("\nLearning next rule...")
+    
+    min_attendance = remaining_students["Attendance"].min()
+    
+    print("Minimum Attendance:", min_attendance)
+    
+    rule3 = "If Attendance >= " + str(min_attendance) + " THEN Scholarship = Eligible"
+    
+    print("New Rule:", rule3)
+    
+    not_eligible_students = df[df.Scholarship == "Not Eligible"]
+    
+    wrongly_covered3 = not_eligible_students[
+        not_eligible_students["Attendance"] >= min_attendance
+    ]
+    
+    print("\nWrongly covered by rule3:")
+    print(wrongly_covered3)
+    
+    print("\nNumber of wrongly covered by rule3:", len(wrongly_covered3))
 
-def predict_scholarship(cgpa, backlogs, min_cgpa, selected_rule):
+    covered_by_rule3 = remaining_students[
+    remaining_students["Attendance"] >= min_attendance
+]
 
-        if "Backlogs = 0" in selected_rule:
+    print("\nStudents covered by rule3:")
+    print(covered_by_rule3)
 
-                if cgpa >= min_cgpa and backlogs == 0:
-                         return "Eligible"
-                else:
-                        return "Not eligible" 
-        else:
-                if cgpa >= min_cgpa:
-                        return "Eligible"
-                else:
-                        return "Not eligible"
+    print("\nNumber of students covered by rule3:", len(covered_by_rule3))
 
 
+    rules.append(rule3)
+
+    remaining_students = remaining_students.drop(covered_by_rule3.index)
+
+    print("\nRemaining students after rule3:")
+    print(remaining_students)
+
+    print("\nNumber of remaining students:", len(remaining_students))
 
 
-# cgpa = float(input("Enter your cgpa:"))
-# backlogs = int(input("Enter your number of backlogs:"))
 
-# result = predict_scholarship(cgpa, backlogs, min_cgpa, selected_rule)
-# print("Scholarship:", result)
+def predict_scholarship(cgpa, attendance, backlogs, min_cgpa, selected_rule, rules):
+
+    for rule in rules:
+
+        if "Backlogs = 0" in rule:
+            if cgpa >= min_cgpa and backlogs == 0:
+                return "Eligible"
+
+        elif "Attendance >=" in rule:
+            min_attendance = float(rule.split(">=")[1].split("THEN")[0])
+
+            if attendance >= min_attendance:
+                return "Eligible"
+
+    return "Not eligible"
+
 
 
 def main():
@@ -129,6 +167,7 @@ def main():
 
     min_cgpa = None
     selected_rule = None
+    rules = None
 
     while True:
         print("\n1. Learn Scholarship Rules")
@@ -139,21 +178,27 @@ def main():
 
         if choice == "1":
             print("\nLearned Scholarship Rule:")
-            min_cgpa, selected_rule = sequential_covering(df)
+            min_cgpa, selected_rule, rules = sequential_covering(df)
 
         elif choice == "2":
 
-            if selected_rule is None:
-                print("\nPlease learn the scholarship rules first.")
-            else:
-                cgpa = float(input("Enter your CGPA: "))
-                backlogs = int(input("Enter your number of backlogs: "))
+                if selected_rule is None:
+                        print("\nPlease learn the scholarship rules first.")
+                else:
+                        cgpa = float(input("Enter your CGPA: "))
+                        attendance = float(input("Enter your attendance: "))
+                        backlogs = int(input("Enter your number of backlogs: "))
 
-                result = predict_scholarship(
-                    cgpa, backlogs, min_cgpa, selected_rule
-                )
+                        result = predict_scholarship(
+                        cgpa,
+                        attendance,
+                        backlogs,
+                        min_cgpa,
+                        selected_rule,
+                        rules
+                        )
 
-                print("Scholarship:", result)
+                        print("Scholarship:", result)
 
         elif choice == "3":
             print("Thank you for using Scholarship Rule Learning System.")
