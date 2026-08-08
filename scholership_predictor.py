@@ -28,7 +28,7 @@ def sequential_covering(df):
 
         rules = []
 
-        rule = " If CGPA >= " + str(min_cgpa) + " THEN Scholarship = Eligible"
+        rule = "If CGPA >= " + str(min_cgpa) + " THEN Scholarship = Eligible"
         rules.append(rule)
 
         wrongly_covered = not_eligible_students[not_eligible_students["CGPA"] >= min_cgpa]
@@ -38,7 +38,7 @@ def sequential_covering(df):
 
         print("\n Number of students wrongly covered:", len(wrongly_covered))
 
-        rule2 = " If CGPA >= " + str(min_cgpa) + " AND Backlogs = 0 " " THEN Scholarship = Eligible"
+        rule2 = "If CGPA >= " + str(min_cgpa) + " AND Backlogs = 0 " " THEN Scholarship = Eligible"
         
 
         wrongly_covered2 = not_eligible_students[
@@ -58,9 +58,44 @@ def sequential_covering(df):
 
         print("\n Selected Rule:")
         print(rules[0])
+
+        selected_rule = rules[0]
+
+        covered_students = eligible_students[
+                (eligible_students["CGPA"] >= min_cgpa) & 
+                (eligible_students["Backlogs"] == 0)]
+
+        print("\n Students covrered by the selected rule:")
+        print(covered_students)
+
+        print("\n Number of covered students:", len(covered_students))
+
+        if len(covered_students) == len(eligible_students):
+                print("All eligible students are covered.")
+                print("No more rules are required.")
+
+        print("\n Learned rules:")
+        for rule in rules:
+                print(rule)
+
+        return min_cgpa, selected_rule
                   
 
 print("\nSequential Covering Algorithm:")
-sequential_covering(df)
+min_cgpa, selected_rule = sequential_covering(df)
 
+
+def predict_scholarship(cgpa, backlogs, min_cgpa):
+
+        if cgpa >= min_cgpa and backlogs == 0:
+                return "Eligible"
+        else:
+                return "Not eligible" 
+
+
+cgpa = float(input("Enter your cgpa:"))
+backlogs = int(input("Enter your number of backlogs:"))
+
+result = predict_scholarship(cgpa, backlogs, min_cgpa)
+print("Scholarship:", result)
 
