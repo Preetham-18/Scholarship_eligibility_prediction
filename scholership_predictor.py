@@ -60,7 +60,7 @@ def sequential_covering(df):
         print(rules[0])
 
         selected_rule = rules[0]
-        
+
         if "Backlogs = 0" in selected_rule:
                 covered_students = eligible_students[
                 (eligible_students["CGPA"] >= min_cgpa) &
@@ -76,9 +76,16 @@ def sequential_covering(df):
 
         print("\n Number of covered students:", len(covered_students))
 
-        if len(covered_students) == len(eligible_students):
-                print("All eligible students are covered.")
-                print("No more rules are required.")
+        remaining_students = eligible_students.drop(covered_students.index)
+
+        print("\n Remaining eligible students:")
+        print(remaining_students)
+
+        if len(remaining_students) == 0:
+              print("\nAll eligible students are covered:")
+              print("No more rules are required.")
+        else:
+             print("\nMore rules are required.")
 
         print("\n Learned rules:")
         for rule in rules:
